@@ -13,10 +13,12 @@ import {
   notificationIdParamSchema,
 } from "../validators/index.js";
 
-const router = Router();
+import {verifyProjectApiKey} from "../middleware/verifyProjectApiKey.middleware.js"
 
+const router = Router();
+// router.use(verifyProjectApiKey)
 // Create a new notification
-router.post("/",  sendNotification);
+router.post("/",verifyProjectApiKey,  sendNotification);
 
 // Get notifications by recipientId / recieptId with pagination & filters
 

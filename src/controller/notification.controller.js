@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Notification } from "../models/notification.model.js";
 import { Project } from "../models/project.model.js";
+import { enqueueEmail } from "../queue/producer/email.producer.js";
 import { catchAsync, AppError } from "../middleware/error.middleware.js";
 import {sendNotificationService} from "../services/sendNotification/sendNotfication.service.js";
 const ALLOWED_CHANNELS = ["in_app", "email", "sms", "push"];
@@ -8,7 +9,8 @@ const ALLOWED_CHANNELS = ["in_app", "email", "sms", "push"];
 // @desc    Create a new notification
 // @route   POST /api/notifications
 export const sendNotification = catchAsync(async (req, res) => {
-  // console.log(req.body)
+  console.log(req.body)
+
   const {
     title,
     to,
@@ -16,13 +18,15 @@ export const sendNotification = catchAsync(async (req, res) => {
     data,
     channel,
   } = req.body;
+  
+  console.log("to",to)
  // Log the request body for debugging
   // Support both recipientId and recieptId
   const recipientId = req.body.recipientId || req.body.recieptId;
 
   // Support projectId from body, route params, or attached project
   const projectId = req.body.projectId || req.params.projectId || req.project?._id;
-
+console.log(projectId)
   if (!projectId) {
     throw new AppError("Project ID is required", 400);
   }
@@ -46,16 +50,20 @@ export const sendNotification = catchAsync(async (req, res) => {
       400
     );
   }
-
+   
+ if(channel ==="email" && !to){
+  throw new AppError("recieptent email is required");
+ }
   // Verify that the project exists
   const project = await Project.findById(projectId);
   if (!project) {
     throw new AppError("Project not found", 404);
   }
-  const r=await Notification.create({
+  const notifi=await Notification.create({
           projectId,
           recipientId,
           title,
+          to,
           body,
           data,
           channel
@@ -63,11 +71,11 @@ export const sendNotification = catchAsync(async (req, res) => {
       // console.log("R",r)
   //  console.log(to,recipientId,title)
   if(channel!=="in_app"){
-  const notification = await sendNotificationService(projectId,to, recipientId, title, body, data,channel);
+  const notification = await enqueueEmail(notifi._id)
   }
   res.status(202).json({
     status: "success",
-    data: r,
+    data: notifi,
   });
 });
 

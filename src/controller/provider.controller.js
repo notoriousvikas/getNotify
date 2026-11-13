@@ -48,7 +48,7 @@ export const createProvider = catchAsync(async (req, res) => {
     }
   }
 
-  // If custom provider, ensure either apiKey or SMTP host/port config is supplied
+
   if (type === "custom") {
     const isSmtp = provider.toLowerCase() === "smtp";
     if (isSmtp && (!config || !config.host)) {

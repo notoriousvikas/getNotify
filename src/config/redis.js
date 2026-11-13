@@ -2,7 +2,7 @@
 import IORedis from "ioredis";
 import dotenv from "dotenv"
 dotenv.config({
-  path:"../../.env"
+  path: ".env"
 })
 
 // console.log(process.env.REDIS_URL)

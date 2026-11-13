@@ -3,22 +3,22 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-export const transporter = nodemailer.createTransport({
-   host: "smtp.gmail.com",
-  port: 587,
+
+
+export const sendEmail = async (to,subject,text,fromEmail,pass,host,port)=>{
+  console.log("reached smptp")
+   const transporter = nodemailer.createTransport({
+   host: host,
+  port: port,
   secure: false, // Use true for port 465, false for port 587
   auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASS,
+    user: fromEmail,
+    pass: pass,
   },
 });
-
-export const sendEmail = async (to,subject,text)=>{
-  console.log("reached smptp")
- 
  try {
   const sendingMail = await transporter.sendMail({
-    from: process.env.EMAIL,
+    from: fromEmail,
     to,
     subject,
     text

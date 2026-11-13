@@ -9,7 +9,16 @@ export const createEmailProvider = (provider) => {
     typeof provider === "object"
       ? provider?.apiKey || provider?.credentials?.apiKey
       : undefined;
+   const host = typeof provider ==="object" ? provider.config.host :undefined;
+      const port = typeof provider ==="object" ? provider.config.port :undefined;
 
+      const fromEmail = typeof provider ==="object"?provider.config.fromEmail :undefined
+      const pass = typeof provider ==="object"?provider.config.password :undefined
+      if(providerType==="smtp" &&(!host || !fromEmail || !port || !pass)){
+        const error = new Error("please provide smtp details")
+        error.retryable=false;
+        throw error;
+      }
   switch (providerType?.toLowerCase()) {
     case "resend":
       return {
@@ -19,7 +28,7 @@ export const createEmailProvider = (provider) => {
 
     case "smtp":
       return {
-        sendEmail: (to, subject, text) => sendSmtpEmail(to, subject, text),
+        sendEmail: (to, subject, text) => sendSmtpEmail(to, subject, text,fromEmail,pass,host,port),
       };
 
     default:
