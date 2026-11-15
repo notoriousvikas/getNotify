@@ -1,4 +1,5 @@
 import { Organization } from "../models/organizastion.model.js";
+import { setCache,getCache } from "../utils/redis/cache.redis.js";
 import {User} from "../models/user.model.js"
 import { catchAsync, AppError
 
@@ -76,13 +77,26 @@ const getOrganization = catchAsync(async (req, res) => {
 
 const getOrganizationByUserId = catchAsync(async (req, res) => {
   const userId = req.user._id;
-  const organizations = await Organization.find({ owner: userId });
+  const cacheKey= `organisation:${userId}`
+  const cached = await getCache(cacheKey);
+if(cached){
+  return res.status(200).json({
+       status: "success",
+    results: cached.length,
+    data: cached,
+  })
+}
+  const organizations = await Organization.find({ owner: userId }).lean();
+  console.log("reaching mongo")
+   await setCache(cacheKey,JSON.stringify(organizations),600)
+ 
+
   res.status(200).json({
     status: "success",
     results: organizations.length,
     data: organizations,
   });
-
+   
 })
 
 export { createOrganization, updateOrganization, getOrganization, getOrganizationByUserId };

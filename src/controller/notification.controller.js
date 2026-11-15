@@ -78,7 +78,76 @@ console.log(projectId)
     data: notifi,
   });
 });
+export const triggerEvent = catchAsync(async (req, res) => {
+  console.log(req.body)
 
+  const {
+    title,
+    to,
+    body,
+    data,
+    channel,
+  } = req.body;
+  
+  console.log("to",to)
+ // Log the request body for debugging
+  // Support both recipientId and recieptId
+  const recipientId = req.body.recipientId || req.body.recieptId;
+
+  // Support projectId from body, route params, or attached project
+  const projectId = req.body.projectId || req.params.projectId || req.project?._id;
+console.log(projectId)
+  if (!projectId) {
+    throw new AppError("Project ID is required", 400);
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    throw new AppError("Invalid Project ID format", 400);
+  }
+
+  if (!recipientId) {
+    throw new AppError("Recipient ID (recipientId/recieptId) is required", 400);
+  }
+
+  if (!channel) {
+    console.log("throw channel error")
+    throw new AppError("Notification channel is required", 400);
+  }
+
+  if (!ALLOWED_CHANNELS.includes(channel)) {
+    throw new AppError(
+      `Invalid channel. Allowed channels: ${ALLOWED_CHANNELS.join(", ")}`,
+      400
+    );
+  }
+   
+ if(channel ==="email" && !to){
+  throw new AppError("recieptent email is required");
+ }
+  // Verify that the project exists
+  const project = await Project.findById(projectId);
+  if (!project) {
+    throw new AppError("Project not found", 404);
+  }
+  const notifi=await Notification.create({
+          projectId,
+          recipientId,
+          title,
+          to,
+          body,
+          data,
+          channel
+      });
+      // console.log("R",r)
+  //  console.log(to,recipientId,title)
+  if(channel!=="in_app"){
+  const notification = await enqueueEmail(notifi._id)
+  }
+  res.status(202).json({
+    status: "success",
+    data: notifi,
+  });
+});
 export const getNotificationsByRecipientId = catchAsync(async (req, res) => {
   // Support recipientId / recieptId from params or query
   const recipientId =

@@ -1,5 +1,6 @@
 import { Project } from "../models/project.model.js";
 import { Organization } from "../models/organizastion.model.js";
+import {getCache,setCache} from "../utils/redis/cache.redis.js"
 import { catchAsync, AppError } from "../middleware/error.middleware.js";
 
 // Helper to generate a URL-safe slug
@@ -16,7 +17,7 @@ const generateSlug = (text) => {
 const createProject = catchAsync(async (req, res) => {
   const organizationId = req.params.organizationId || req.body.organizationId;
   const { name, slug, description, setting, status } = req.body;
-
+  
   if (!organizationId) {
     throw new AppError("Organization ID is required", 400);
   }
@@ -129,17 +130,26 @@ const updateProject = catchAsync(async (req, res) => {
 // @desc    Get all projects for an organization
 // @route   GET /api/organizations/:organizationId/projects
 const getProjectsByOrganization = catchAsync(async (req, res) => {
+  
   const { organizationId } = req.params;
-
+  const cacheKey = `project:${organizationId}`
   const organization = await Organization.findById(organizationId);
   if (!organization) {
     throw new AppError("Organization not found", 404);
+  }
+  const cached = await getCache(cacheKey)
+  if(cached){
+    return res.status(200).json({
+      status:"success",
+      results:cached.length,
+      data:cached,
+    })
   }
 
   const projects = await Project.find({ organizationId }).sort({
     createdAt: -1,
   });
-
+  const saveToRedis = await setCache(cacheKey,JSON.stringify(projects),600)
   res.status(200).json({
     status: "success",
     results: projects.length,

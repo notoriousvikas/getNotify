@@ -14,7 +14,7 @@ import apiKeyRouter from "./src/routes/apikey.route.js";
 import providerRouter from "./src/routes/provider.route.js";
 import OrganizationRouter from "./src/routes/organization.route.js";
 import InboxRouter from "./src/routes/inbox.route.js";
-
+import DashboardRouter from "./src/routes/dashboard.route.js"
 
 
 
@@ -94,6 +94,8 @@ app.use("/api/v1/api-keys", apiKeyRouter);
 app.use("/api/v1/providers", providerRouter);
 app.use("/api/v1/organizations", OrganizationRouter);
 app.use("/api/v1/inbox", InboxRouter);
+app.use("/api/v1/dashboard",DashboardRouter)
+
 // Handle unhandled routes (404)
 
 app.all("/{*splat}", (req, res, next) => {

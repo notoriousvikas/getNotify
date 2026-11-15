@@ -9,7 +9,7 @@ import { verifyAuth } from "../middleware/auth.middleware.js";
 
 const router = Router();
 // router.use(verifyAuth)
-router.use(verifyProjectApiKey);
+
 
 router.get("/",getNotifications);
 router.patch("/:notificationId/read",markNotificationAsRead);
