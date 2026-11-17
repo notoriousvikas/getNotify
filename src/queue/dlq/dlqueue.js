@@ -1,5 +1,5 @@
 import {Queue} from "bullmq"
-import { redisConnection } from "../connection"
+import { redisConnection } from "../connection.js"
 
 const dlqueue = new Queue('queue',{redisConnection});
 
