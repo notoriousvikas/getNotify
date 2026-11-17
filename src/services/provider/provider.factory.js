@@ -1,6 +1,7 @@
+import { text } from "express";
 import { sendEmail as sendResendEmail } from "./adapter/resend.adapter.js";
 import { sendEmail as sendSmtpEmail } from "./adapter/smtp.adapter.js";
-
+import {sendSms, sendSms as sendTwilioSms} from "./adapter/twilio.adapter.js"
 export const createEmailProvider = (provider) => {
   const providerType =
     typeof provider === "string" ? provider : provider?.provider;
@@ -19,6 +20,7 @@ export const createEmailProvider = (provider) => {
         error.retryable=false;
         throw error;
       }
+      const credentials = provider.credentials
   switch (providerType?.toLowerCase()) {
     case "resend":
       return {
@@ -30,6 +32,10 @@ export const createEmailProvider = (provider) => {
       return {
         sendEmail: (to, subject, text) => sendSmtpEmail(to, subject, text,fromEmail,pass,host,port),
       };
+    case "twilio":
+       return {
+        sendSms:(to,text) => sendResendEmail(to,text,credentials)
+       }
 
     default:
       throw new Error(`Unsupported email provider: ${providerType}`);

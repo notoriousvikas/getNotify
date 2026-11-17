@@ -1,14 +1,14 @@
 
 import { emailQueue } from "../email.queue.js";
 
-export const enqueueEmail = async (notificationId) => {
+export const enqueueEmail = async (notification) => {
   return await emailQueue.add(
     "send-email",
     {
-      notificationId: notificationId.toString(),
+      notificationId: notification,
     },
     {
-      jobId: `email-${notificationId}`,
+      jobId: `email-${notification.id}`,
     }
   );
 };

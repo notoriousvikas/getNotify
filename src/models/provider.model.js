@@ -11,7 +11,9 @@ const providerSchema = new mongoose.Schema(
     // Provider name (e.g., 'resend', 'smtp', 'sendgrid', 'twilio', 'fcm')
     provider: {
       type: String,
+     
       required: true,
+
       trim: true,
       lowercase: true,
     },
@@ -32,6 +34,13 @@ const providerSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: null,
+    },
+    credentials:{
+        from:{type: String, trim:true},
+        apiKey:{type: String, trim:true},
+        apiSecret:{type: String, trim:true},
+        accountSid:{type: String, trim:true}
+
     },
     // Additional credentials & settings (e.g., SMTP or sender details)
     config: {

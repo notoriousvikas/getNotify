@@ -20,7 +20,7 @@ import { verifyOrganizationOwner } from "../middleware/authorization.middleware.
 const router = Router();
 // router.use(verifyProjectApiKey)
 // Create a new notification
-router.post("/", verifyAuth, verifyOrganizationOwner, sendNotification);
+router.post("/", verifyProjectApiKey,sendNotification);
 router.post("/triggerEvent", verifyProjectApiKey, triggerEvent)
 // Get notifications by recipientId / recieptId with pagination & filters
 

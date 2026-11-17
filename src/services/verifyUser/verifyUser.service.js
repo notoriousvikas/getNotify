@@ -1,6 +1,6 @@
 
 import { AppError } from "../../middleware/error.middleware.js";
-import crypto from "crypto";
+import crypto from "crypto"; 
 import { User } from "../../models/user.model.js"
 
 
@@ -48,7 +48,7 @@ export const sendOtpToUser = async (userId) => {
     if (!sentotp) {
         throw new AppError("cannot send otp", 400)
     }
-
+ 
   return user.otp.expiresAt;
 
 }

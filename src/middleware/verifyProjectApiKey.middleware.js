@@ -14,10 +14,10 @@ export const verifyProjectApiKey = async(req,res,next)=>{
         if(!apiKeyDoc){
             return res.status(401).json({message:"Invalid API key"})
         }
-             if(apiKeyDoc.isValid()===false){
+             if(apiKeyDoc.$isValid()===false){
              return res.status(401).json({message:"Api key is expired"})
         }
- 
+         
         req.projectId = apiKeyDoc.projectId;
         next();
 

@@ -15,7 +15,7 @@ export const messageLimiter = new Ratelimit({
 });
 export const registerLimiter = new Ratelimit({
     redis,
-    limititer: Ratelimit.slidingWindow(5,"15 m"),
+    limititer: Ratelimit.slidingWindow(3,"200 m"),
     prefix:"ratelimit:register"
 })
 export const likeLimiter = new Ratelimit({

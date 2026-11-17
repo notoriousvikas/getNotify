@@ -25,7 +25,7 @@ export const sendNotification = catchAsync(async (req, res) => {
   const recipientId = req.body.recipientId || req.body.recieptId;
 
   // Support projectId from body, route params, or attached project
-  const projectId = req.body.projectId || req.params.projectId || req.project?._id;
+  const projectId = req.projectId
 console.log(projectId)
   if (!projectId) {
     throw new AppError("Project ID is required", 400);
@@ -46,7 +46,7 @@ console.log(projectId)
 
   if (!ALLOWED_CHANNELS.includes(channel)) {
     throw new AppError(
-      `Invalid channel. Allowed channels: ${ALLOWED_CHANNELS.join(", ")}`,
+      `Invalid channel. Allowed channels: ${ALLOWED_CHANNELS.join(", ")}`, 
       400
     );
   }
@@ -288,7 +288,4 @@ export const deleteNotification = catchAsync(async (req, res) => {
   });
 });
 
-// Aliases for flexibility and matching various naming conventions
-export const getNotificationByRecipientId = getNotificationsByRecipientId;
-export const getByReceiptId = getNotificationsByRecipientId;
-export const getByRecipientId = getNotificationsByRecipientId;
+

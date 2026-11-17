@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { redisConnection } from "../config/redis.js";
 import { Notification } from "../models/notification.model.js";
+import {addTodlq} from "../queue/dlq/dlqueue.js"
 import connectDb from "../config/connectDb.js";
 import {sendMail} from "../utils/mail/send.mail.js"
 
@@ -10,23 +11,26 @@ const processEmail =   async (job) => {
     const { notificationId } = job.data;
 
     // Fetch notification
-
-    const notification = await Notification.findById(notificationId);
-  
+    console.log(notificationId)
+    const notification = await Notification.findByIdAndUpdate(notificationId,{$set:{status:"processing"}},{new:true, runValidators:true});
+    
     if (!notification) {
       throw new Error("Notification not found");
     }
 
     // Get email information from notification
     const { recipientId,title, subject,body, text, projectId,to } = notification;
-  
+     
      try {
           const email = await sendMail({projectId:projectId,subject:title,
       text: body|| text,
       to:to});
-     } catch (error) {
-  
-      throw error;
+      if(email){
+        await Notification.findByIdAndUpdate(notificationId,{$set:{status:"sent"}},{new:true, runValidators:true});
+      }
+     } catch (err) {
+      
+     throw err;
      }
      
     // Send email
@@ -47,12 +51,21 @@ export const emailWorker = new Worker(
   }
 );
 
-emailWorker.on("completed", (job) => {
+emailWorker.on("completed", async(job) => {
   console.log(`Email job ${job.id} completed`);
+  await Notification.findByIdAndUpdate(job.data.notificationId,{$set:{status:"delivered"}},{new:true, runValidators:true});
 });
 
-emailWorker.on("failed", (job, error) => {
+emailWorker.on("failed", async(job, error) => {
   console.error(`Email job ${job?.id} failed:`, error.message);
+  const maxattempts = job.opts.attempts
+  if(job.attemptsMade>=maxattempts){
+     await addTodlq(job,error)
+  await Notification.findByIdAndUpdate(job.data.notificationId,{$set:{status:"failed"}},{new:true, runValidators:true});
+  }
+ 
+
+
 });
 
 emailWorker.on("error", (error) => {

@@ -36,7 +36,9 @@ const notificationSchema = new mongoose.Schema({
     enum: ["in_app", "email", "sms", "push"],
     required: true,
   },
-
+  idempotencyKey:{
+    type:String
+  },
   readAt: Date,
 
   createdAt: {
