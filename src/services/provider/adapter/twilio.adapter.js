@@ -1,33 +1,48 @@
 import twilio from "twilio";
 
-export const sendSms =async(to,body,credentials)=>{
-      const {
-    accountSid,
+export const sendSms = async (to, body, credentials) => {
+  const {
+    accountSid = process.env.TWILIO_ACCOUNT_SID,
     apiKey,
-    apiSecret,from
+    apiSecret,
+    authToken = process.env.TWILIO_AUTH_TOKEN,
+    from = process.env.TWILIO_PHONE_NUMBER,
   } = credentials || {};
-  if(!accountSid ||!apiKey || !apiSecret || !from){
-    const error = new Error("credentials are required ")
-    error.retryable=false;
+
+  if (!accountSid) {
+    const error = new Error("Twilio accountSid is required");
+    error.retryable = false;
     throw error;
   }
-  if(!to || !body ){
-    const error = new Error("body is required")
-    error.retryable=false
+
+  if (!from) {
+    const error = new Error("Twilio sender 'from' phone number is required");
+    error.retryable = false;
     throw error;
   }
-  const client = twilio(apiKey,apiSecret,{accountSid});
-  if(!client){
-    const error = new Error("service is down try later")
-    error.retryable = true;
+
+  if (!to || !body) {
+    const error = new Error("Recipient 'to' phone number and message 'body' are required");
+    error.retryable = false;
     throw error;
+  }
 
-}
+  let client;
+  if (apiKey && apiSecret) {
+    client = twilio(apiKey, apiSecret, { accountSid });
+  } else if (authToken) {
+    client = twilio(accountSid, authToken);
+  } else {
+    const error = new Error("Twilio credentials (apiKey + apiSecret or authToken) are required");
+    error.retryable = false;
+    throw error;
+  }
 
-const message = await client.messages.create({
+  const message = await client.messages.create({
     from,
     to,
-    body
-})
-return message;
-}
+    body,
+  });
+
+  return message;
+};
