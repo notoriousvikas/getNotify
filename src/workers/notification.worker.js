@@ -27,7 +27,7 @@ const workerOptions = {
   },
 };
 
-// ==================== EMAIL PROCESSOR ====================
+
 const processEmail = async (job) => {
   const { notificationId } = job.data;
   console.log("Processing email for notification:", notificationId);
