@@ -4,10 +4,11 @@ import {User} from "../models/user.model.js"
 import { catchAsync, AppError
 
  } from "../middleware/error.middleware.js";
-
+import Usage from "../models/usage.model.js"
 
 const createOrganization = catchAsync(async (req, res) => {
   const { name, description } = req.body;
+     const month =new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     if (!name) {
     throw new AppError("Organization name is required", 400);}
     if(!description){
@@ -25,6 +26,7 @@ const createOrganization = catchAsync(async (req, res) => {
     if(!organization){
         throw new AppError("Failed to create organization", 500);
     }
+    await Usage.create({organizationId:organization._id,resetAt:month})
     res.status(201).json({
         status: "success",
         data: organization

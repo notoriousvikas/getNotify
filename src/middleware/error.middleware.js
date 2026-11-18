@@ -30,6 +30,7 @@ export const notificationSchema = catchAsync;
 
 // Global Express error handler middleware
 export const errorHandler = (err, req, res, next) => {
+    console.error(err)
     const statusCode = err.statusCode || 500;
     const status = err.status || "error";
 

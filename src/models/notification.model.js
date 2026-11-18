@@ -13,7 +13,8 @@ const notificationSchema = new mongoose.Schema({
     "processing",
     "sent",
     "delivered",
-    "failed"
+    "failed",
+    "scheduled"
   ],
   default: "queued",
 },
@@ -39,6 +40,9 @@ const notificationSchema = new mongoose.Schema({
   idempotencyKey:{
     type:String
   },
+  scheduleAt:{
+    type:Date
+  },
   readAt: Date,
 
   createdAt: {
@@ -50,6 +54,7 @@ const notificationSchema = new mongoose.Schema({
 // Compound index for fast queries by project and recipient
 notificationSchema.index({ projectId: 1, recipientId: 1, createdAt: -1 });
 notificationSchema.index({ recipientId: 1, createdAt: -1 });
+notificationSchema.index({ status: 1, scheduleAt: 1 });
 
 export const Notification =
   mongoose.models.Notification || mongoose.model("Notification", notificationSchema);

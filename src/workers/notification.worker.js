@@ -4,9 +4,9 @@ import { Notification } from "../models/notification.model.js";
 import {addTodlq} from "../queue/dlq/dlqueue.js"
 import connectDb from "../config/connectDb.js";
 import {sendMail} from "../utils/mail/send.mail.js"
-
+import {notificationScheduler} from "../schedulers/notification.scheduler"
 await connectDb();
-
+notificationScheduler();
 const processEmail =   async (job) => {
     const { notificationId } = job.data;
 
@@ -43,6 +43,7 @@ export const emailWorker = new Worker(
   {
     connection:redisConnection,
     concurrency: 10,
+    drainDelay:5,
     limiter:{
         duration:1000,
         max:10

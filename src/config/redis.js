@@ -6,18 +6,15 @@ dotenv.config({
 })
 
 // console.log(process.env.REDIS_URL)
-export const redisConnection = new IORedis(
-  process.env.REDIS_URL,
-  {
-    maxRetriesPerRequest: null,
-    enableReadyCheck: true,
-  }
-);
+const parsedUrl = new URL(process.env.REDIS_URL);
 
-redisConnection.on("connect", () => {
-  console.log("Redis connected");
-});
-
-redisConnection.on("error", (error) => {
-  console.error("Redis error:", error);
-});
+export const redisConnection = {
+  host: parsedUrl.hostname,
+  port: Number(parsedUrl.port) || 6379,
+  username: parsedUrl.username || undefined,
+  password: parsedUrl.password || undefined,
+  tls: parsedUrl.protocol === "rediss:" ? {} : undefined,
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false, // Required for Upstash
+  keepAlive: 10000,        // Keeps TCP socket alive so Upstash proxy doesn't drop BZPOPMIN
+};

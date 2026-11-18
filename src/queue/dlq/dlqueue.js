@@ -1,7 +1,7 @@
 import {Queue} from "bullmq"
 import { redisConnection } from "../connection.js"
 
-const dlqueue = new Queue('queue',{redisConnection});
+const dlqueue = new Queue('queue',{connection:redisConnection});
 
 export const addTodlq = async(job,error)=>{
     return await dlqueue.add(

@@ -3,6 +3,7 @@ import { Notification } from "../models/notification.model.js";
 import { Project } from "../models/project.model.js";
 import { enqueueEmail } from "../queue/producer/email.producer.js";
 import { catchAsync, AppError } from "../middleware/error.middleware.js";
+import Usage from "../models/usage.model.js";
 import {sendNotificationService} from "../services/sendNotification/sendNotfication.service.js";
 const ALLOWED_CHANNELS = ["in_app", "email", "sms", "push"];
 
@@ -17,6 +18,7 @@ export const sendNotification = catchAsync(async (req, res) => {
     body,
     data,
     channel,
+    scheduleAt
   } = req.body;
   
   console.log("to",to)
@@ -24,7 +26,97 @@ export const sendNotification = catchAsync(async (req, res) => {
   // Support both recipientId and recieptId
   const recipientId = req.body.recipientId || req.body.recieptId;
 
-  // Support projectId from body, route params, or attached project
+
+  const projectId = req.projectId
+console.log(projectId)
+  if (!projectId) {
+    throw new AppError("Project ID is required", 400);
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    throw new AppError("Invalid Project ID format", 400);
+  }
+
+  if (!recipientId) {
+    throw new AppError("Recipient ID (recipientId/recieptId) is required", 400);
+  }
+
+  if (!channel) {
+    console.log("throw channel error")
+    throw new AppError("Notification channel is required", 400);
+  }
+
+  if (!ALLOWED_CHANNELS.includes(channel)) {
+    throw new AppError(
+      `Invalid channel. Allowed channels: ${ALLOWED_CHANNELS.join(", ")}`, 
+      400
+    );
+  }
+   
+ if(channel ==="email" && !to){
+  throw new AppError("recieptent email is required");
+ }
+  // Verify that the project exists
+  const project = await Project.findById(projectId);
+  if (!project) {
+    throw new AppError("Project not found", 404);
+  }
+  let status="queued"
+  if(scheduleAt){
+    status="scheduled"
+  }
+  const notifi=await Notification.create({
+          projectId,
+          recipientId,
+          title,
+          to,
+          body,
+          data,
+          channel,
+          scheduleAt,
+          status
+      });
+      // console.log("R",r)
+  //  console.log(to,recipientId,title)
+  if(channel!=="in_app"){
+  const notification = await enqueueEmail(notifi._id)
+  }
+  console.log("Schedule in controller",scheduleAt)
+  
+  // await Usage.findOneAndUpdate({
+  //   projectId:projectId
+  // },
+  //       { $inc: { totalUsage: 1 } },
+  //   {
+  //     // returnDocument: "after", 
+  //     upsert: true,           
+  //     runValidators: true,  
+  //     setDefaultsOnInsert: true, 
+    
+  // })
+  res.status(202).json({
+    status: "success",
+    data: notifi,
+  });
+});
+export const triggerEvent = catchAsync(async (req, res) => {
+  console.log(req.body)
+
+  const {
+    title,
+    to,
+    body,
+    data,
+    channel,
+  
+  } = req.body;
+  
+  console.log("to",to)
+ // Log the request body for debugging
+  // Support both recipientId and recieptId
+  const recipientId = req.body.recipientId || req.body.recieptId;
+
+
   const projectId = req.projectId
 console.log(projectId)
   if (!projectId) {
@@ -71,78 +163,20 @@ console.log(projectId)
       // console.log("R",r)
   //  console.log(to,recipientId,title)
   if(channel!=="in_app"){
-  const notification = await enqueueEmail(notifi._id)
+  const notification = await enqueueEmail(notifi._id,)
   }
-  res.status(202).json({
-    status: "success",
-    data: notifi,
-  });
-});
-export const triggerEvent = catchAsync(async (req, res) => {
-  console.log(req.body)
-
-  const {
-    title,
-    to,
-    body,
-    data,
-    channel,
-  } = req.body;
   
-  console.log("to",to)
- // Log the request body for debugging
-  // Support both recipientId and recieptId
-  const recipientId = req.body.recipientId || req.body.recieptId;
-
-  // Support projectId from body, route params, or attached project
-  const projectId = req.body.projectId || req.params.projectId || req.project?._id;
-console.log(projectId)
-  if (!projectId) {
-    throw new AppError("Project ID is required", 400);
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(projectId)) {
-    throw new AppError("Invalid Project ID format", 400);
-  }
-
-  if (!recipientId) {
-    throw new AppError("Recipient ID (recipientId/recieptId) is required", 400);
-  }
-
-  if (!channel) {
-    console.log("throw channel error")
-    throw new AppError("Notification channel is required", 400);
-  }
-
-  if (!ALLOWED_CHANNELS.includes(channel)) {
-    throw new AppError(
-      `Invalid channel. Allowed channels: ${ALLOWED_CHANNELS.join(", ")}`,
-      400
-    );
-  }
-   
- if(channel ==="email" && !to){
-  throw new AppError("recieptent email is required");
- }
-  // Verify that the project exists
-  const project = await Project.findById(projectId);
-  if (!project) {
-    throw new AppError("Project not found", 404);
-  }
-  const notifi=await Notification.create({
-          projectId,
-          recipientId,
-          title,
-          to,
-          body,
-          data,
-          channel
-      });
-      // console.log("R",r)
-  //  console.log(to,recipientId,title)
-  if(channel!=="in_app"){
-  const notification = await enqueueEmail(notifi._id)
-  }
+  await Usage.findOneAndUpdate({
+    projectId:projectId
+  },
+        { $inc: { totalUsage: 1 } },
+    {
+      // returnDocument: "after", 
+      upsert: true,           
+      runValidators: true,  
+      setDefaultsOnInsert: true, 
+    
+  })
   res.status(202).json({
     status: "success",
     data: notifi,

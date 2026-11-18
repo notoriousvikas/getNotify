@@ -8,6 +8,14 @@ export const loginLimiter = new Ratelimit({
     analytics: true,
 })
 
+
+export const apikeyLimiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(100,"1m"),
+    prefix:"ratelimit:key",
+    analytics:true
+})
+
 export const messageLimiter = new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(30, "1 m"),
