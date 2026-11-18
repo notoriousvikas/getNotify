@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { Notification } from "../models/notification.model.js";
 import { Project } from "../models/project.model.js";
 import { enqueueEmail } from "../queue/producer/email.producer.js";
+import { enqueueSms } from "../queue/producer/sms.producer.js";
+import { enqueueInApp } from "../queue/producer/in_app.producer.js";
 import { catchAsync, AppError } from "../middleware/error.middleware.js";
 import Usage from "../models/usage.model.js";
 import {sendNotificationService} from "../services/sendNotification/sendNotfication.service.js";
@@ -53,33 +55,45 @@ console.log(projectId)
     );
   }
    
- if(channel ==="email" && !to){
-  throw new AppError("recieptent email is required");
- }
+  if (channel === "email" && !to) {
+    throw new AppError("Recipient email ('to') is required for email notifications", 400);
+  }
+
+  if (channel === "sms" && !to) {
+    throw new AppError("Recipient phone number ('to') is required for SMS notifications", 400);
+  }
+
   // Verify that the project exists
   const project = await Project.findById(projectId);
   if (!project) {
     throw new AppError("Project not found", 404);
   }
-  let status="queued"
-  if(scheduleAt){
-    status="scheduled"
+
+  let status = "queued";
+  if (scheduleAt) {
+    status = "scheduled";
   }
-  const notifi=await Notification.create({
-          projectId,
-          recipientId,
-          title,
-          to,
-          body,
-          data,
-          channel,
-          scheduleAt,
-          status
-      });
-      // console.log("R",r)
-  //  console.log(to,recipientId,title)
-  if(channel!=="in_app"){
-  const notification = await enqueueEmail(notifi._id)
+
+  const notifi = await Notification.create({
+    projectId,
+    recipientId,
+    title,
+    to,
+    body,
+    data,
+    channel,
+    scheduleAt,
+    status,
+  });
+
+  if (status !== "scheduled") {
+    if (channel === "email") {
+      await enqueueEmail(notifi._id);
+    } else if (channel === "sms") {
+      await enqueueSms(notifi._id);
+    } else if (channel === "in_app") {
+      await enqueueInApp(notifi._id);
+    }
   }
   console.log("Schedule in controller",scheduleAt)
   
@@ -143,27 +157,36 @@ console.log(projectId)
     );
   }
    
- if(channel ==="email" && !to){
-  throw new AppError("recieptent email is required");
- }
+  if (channel === "email" && !to) {
+    throw new AppError("Recipient email ('to') is required for email notifications", 400);
+  }
+
+  if (channel === "sms" && !to) {
+    throw new AppError("Recipient phone number ('to') is required for SMS notifications", 400);
+  }
+
   // Verify that the project exists
   const project = await Project.findById(projectId);
   if (!project) {
     throw new AppError("Project not found", 404);
   }
-  const notifi=await Notification.create({
-          projectId,
-          recipientId,
-          title,
-          to,
-          body,
-          data,
-          channel
-      });
-      // console.log("R",r)
-  //  console.log(to,recipientId,title)
-  if(channel!=="in_app"){
-  const notification = await enqueueEmail(notifi._id,)
+
+  const notifi = await Notification.create({
+    projectId,
+    recipientId,
+    title,
+    to,
+    body,
+    data,
+    channel,
+  });
+
+  if (channel === "email") {
+    await enqueueEmail(notifi._id);
+  } else if (channel === "sms") {
+    await enqueueSms(notifi._id);
+  } else if (channel === "in_app") {
+    await enqueueInApp(notifi._id);
   }
   
   await Usage.findOneAndUpdate({
