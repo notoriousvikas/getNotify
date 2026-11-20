@@ -1,4 +1,4 @@
-// API client — all requests go through Next.js rewrite proxy (/api/v1/* → localhost:3000/api/v1/*)
+// API client — all requests go through the configurable Next.js rewrite proxy.
 // This eliminates CORS entirely since browser sees same-origin requests.
 
 const BASE = "";

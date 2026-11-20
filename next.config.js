@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const backendUrl = (process.env.BACKEND_URL || "http://localhost:3000").replace(/\/$/, "");
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -8,11 +10,11 @@ const nextConfig = {
     return [
       {
         source: "/api/v1/:path*",
-        destination: "http://localhost:3000/api/v1/:path*",
+        destination: `${backendUrl}/api/v1/:path*`,
       },
       {
         source: "/health",
-        destination: "http://localhost:3000/health",
+        destination: `${backendUrl}/health`,
       },
     ];
   },

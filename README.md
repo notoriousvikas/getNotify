@@ -71,6 +71,9 @@ cd frontend
 # Install dependencies (already installed)
 npm install
 
+# Configure the backend URL (copy .env.example to .env.local, then edit it)
+# BACKEND_URL=http://localhost:3000
+
 # Run the development server
 npm run dev
 
@@ -80,3 +83,5 @@ npm start
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) in your browser.
+
+The frontend proxies API requests through Next.js. Set `BACKEND_URL` in `.env.local` to the backend server origin (for example, `https://api.example.com`) to use a different backend. Restart the frontend after changing this value. Local `.env` files are ignored by Git; `.env.example` is tracked as a template.
