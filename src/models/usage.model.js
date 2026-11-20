@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const usageSchema = new mongoose.Schema(
   {
-    organisationId: {
+    organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
       required: true,

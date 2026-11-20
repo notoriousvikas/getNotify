@@ -15,13 +15,13 @@ import {
   projectIdParamSchema,
   organizationIdParamSchema,
 } from "../validators/index.js";
-
+import {checkProject } from "../middleware/quota.middleware.js"
 const router = Router();
 
 // Protect all project routes
 router.use(verifyAuth);
 // router.use(verifyOrganizationOwner)
-router.post("/", validate(createProjectSchema), createProject);
+router.post("/", validate(createProjectSchema),checkProject, createProject);
 router.get(
   "/organization/:organizationId",
   validate(organizationIdParamSchema, "params"),

@@ -26,6 +26,7 @@ const createOrganization = catchAsync(async (req, res) => {
     if(!organization){
         throw new AppError("Failed to create organization", 500);
     }
+  
     await Usage.create({organizationId:organization._id,resetAt:month})
     res.status(201).json({
         status: "success",
