@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
-
+.agents/
+.next/
 # Environment secrets
 .env
 .env.*
