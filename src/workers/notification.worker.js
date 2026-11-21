@@ -51,7 +51,8 @@ const processEmail = async (job) => {
       text: body || text,
       to,
     });
-
+    console.log(emailResult)
+   
     if (emailResult) {
       await Notification.findByIdAndUpdate(
         notificationId,
