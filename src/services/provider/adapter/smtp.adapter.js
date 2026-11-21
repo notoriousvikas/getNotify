@@ -6,16 +6,20 @@ dotenv.config();
 
 
 export const sendEmail = async (to,subject,text,fromEmail,pass,host,port)=>{
-  console.log("reached smptp")
-   const transporter = nodemailer.createTransport({
-   host: host,
-  port: port,
-  secure: false, // Use true for port 465, false for port 587
-  auth: {
-    user: fromEmail,
-    pass: pass,
-  },
-});
+   const smtpPort = Number(port);
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: {
+      user: fromEmail,
+      pass
+    },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 30000
+  });
  try {
   const sendingMail = await transporter.sendMail({
     from: fromEmail,
