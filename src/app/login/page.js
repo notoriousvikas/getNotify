@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Lock, Mail, User, ShieldCheck } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { Button, Card } from "../../components/ui";
+import { LogoIcon } from "../../components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,12 +41,12 @@ export default function LoginPage() {
     <div className="min-h-screen w-full bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between select-none relative font-sans">
       {/* Top Bar */}
       <header className="px-8 py-5 flex items-center justify-between border-b border-[#1f1f24]">
-        <div className="flex items-center space-x-2.5">
-          <div className="w-7 h-7 rounded-lg bg-white text-black font-bold flex items-center justify-center text-xs">
-            N
+        <Link href="/" className="flex items-center space-x-2.5 group">
+          <div className="group-hover:scale-105 transition-transform">
+            <LogoIcon size={28} />
           </div>
           <span className="font-semibold text-sm tracking-tight text-white">getNotify</span>
-        </div>
+        </Link>
       </header>
 
       {/* Center Auth Card */}

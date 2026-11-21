@@ -26,8 +26,11 @@ import {
   Sparkles,
   Command,
   Search,
+  BookOpen,
+  Globe,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { LogoIcon } from "./Logo";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -91,6 +94,8 @@ export default function Sidebar() {
         { name: "Settings", href: "/settings", icon: Settings },
         { name: "Team Members", href: "/team", icon: UserCheck },
         { name: "Billing", href: "/billing", icon: CreditCard },
+        { name: "Documentation", href: "/docs", icon: BookOpen },
+        { name: "Landing Page", href: "/landing", icon: Globe },
       ],
     },
   ];
@@ -119,8 +124,8 @@ export default function Sidebar() {
       {/* Brand Header */}
       <div className="h-14 px-4 flex items-center justify-between border-b border-[#1f1f24]">
         <Link href="/overview" className="flex items-center space-x-2.5 group">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-b from-neutral-200 to-neutral-400 text-black flex items-center justify-center font-bold text-xs shadow-sm group-hover:scale-105 transition-transform">
-            N
+          <div className="group-hover:scale-105 transition-transform">
+            <LogoIcon size={26} />
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-white tracking-tight text-sm">

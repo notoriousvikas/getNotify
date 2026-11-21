@@ -20,6 +20,8 @@ export default function AuthGuard({ children }) {
 
   const isLoginPage = pathname === "/login";
   const isLandingPage = pathname === "/";
+  const isExplicitLanding = pathname === "/landing";
+  const isDocsPage = pathname === "/docs" || pathname?.startsWith("/docs/");
 
   useEffect(() => {
     if (!authChecked) return;
@@ -37,6 +39,16 @@ export default function AuthGuard({ children }) {
     );
   }
 
+  // Explicit landing page (can be visited by both unauthenticated and authenticated users)
+  if (isExplicitLanding) {
+    return (
+      <div className="fixed inset-0 overflow-y-auto bg-[#09090b]">
+        <LandingPage />
+        <NotificationToast />
+      </div>
+    );
+  }
+
   // On login page
   if (isLoginPage) {
     return (
@@ -49,16 +61,28 @@ export default function AuthGuard({ children }) {
     );
   }
 
-  // Not authenticated: show landing page for "/" or redirect to login for protected routes
+  // Not authenticated: public routes vs protected routes
   if (!user) {
+    // Landing page for root "/"
     if (isLandingPage) {
       return (
-        <div className="fixed inset-0 overflow-y-auto bg-black">
+        <div className="fixed inset-0 overflow-y-auto bg-[#09090b]">
           <LandingPage />
           <NotificationToast />
         </div>
       );
     }
+
+    // Public Documentation page: Accessible to everyone (authed or not)
+    if (isDocsPage) {
+      return (
+        <div className="fixed inset-0 overflow-y-auto bg-[#09090b]">
+          {children}
+          <NotificationToast />
+        </div>
+      );
+    }
+
     // Protected route — redirect to login
     if (typeof window !== "undefined") router.replace("/login");
     return (

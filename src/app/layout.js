@@ -3,8 +3,11 @@ import { AppProvider } from "../context/AppContext";
 import AuthGuard from "../components/AuthGuard";
 
 export const metadata = {
-  title: "GetNotify – Notification & Email Infrastructure",
+  title: "getNotify – Notification & Email Infrastructure",
   description: "The modern notification and email delivery platform for developers.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
