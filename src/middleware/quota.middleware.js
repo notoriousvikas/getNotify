@@ -3,14 +3,12 @@ import { Organization } from "../models/organizastion.model.js";
 import {Project} from "../models/project.model.js"
 export const  checkingOrganisation = async(req,res,next)=>{
 try {
-        const User = req.user._id;
-    if(!User){
-       throw new Error("please make login first");
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ message: "Please login first" });
     }
-    const organisation = await Organization.exists({owner:User})
-      console.log(organisation)
-      console.log("organisation length",organisation.length)
-    if(organisation.length){
+    const organisation = await Organization.exists({ owner: userId });
+    if (organisation) {
      return res
         .status(403)
         .json({ message: "You can't create more than 1 organization" });
